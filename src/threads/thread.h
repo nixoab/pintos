@@ -92,6 +92,7 @@ struct thread
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
+    int64_t expr;
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -100,6 +101,7 @@ struct thread
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
+    int64_t expr;
   };
 
 /* If false (default), use round-robin scheduler.
