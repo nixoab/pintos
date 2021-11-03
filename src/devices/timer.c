@@ -185,8 +185,20 @@ timer_print_stats (void)
 static void
 timer_interrupt (struct intr_frame *args UNUSED)
 {
+  struct thread *t;
+
   ticks++;
   thread_tick ();
+
+  while(!list_empty(&alarm_list)){
+    t = list_entry(list_front(&alarm_list),struct thread, elem);
+    if(t->expr <= ticks){
+        list_pop_front(&alarm_list);
+        thread_unblock(t);
+    }else{
+        break;
+    }
+  }
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
@@ -258,4 +270,16 @@ real_time_delay (int64_t num, int32_t denom)
      the possibility of overflow. */
   ASSERT (denom % 1000 == 0);
   busy_wait (loops_per_tick * num / 1000 * TIMER_FREQ / (denom / 1000)); 
+}
+
+bool
+alarm_ordered(const struct list_elem *x,
+              const struct list_elem *y, void *aux UNUSED){
+
+    struct thread *t1 = list_entry(x, struct thread, elem);
+    struct thread *t2 = list_entry(y, struct thread, elem);
+    if(t1->expr < t2 -> expr)
+        return true;
+    else
+        return false;
 }
